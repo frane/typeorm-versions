@@ -140,8 +140,4 @@ describe("Data Mapper", () => {
         expect(await latestVersion!.next()).to.equal(undefined, `failed for ${connection.name}`);
     })));
 
-    //it("next <x> previous", () => Promise.all(connections.map(async connection => { 
-        
-    //})));
-
 });
