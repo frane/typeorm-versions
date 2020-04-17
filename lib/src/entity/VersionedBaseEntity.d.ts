@@ -5,7 +5,7 @@ declare class VersionHelperMethods<T extends BaseEntity> {
     protected getConnection(): Connection;
     list(): Promise<import("./Version").Version[]>;
     previousObject(): Promise<T | undefined>;
-    nextObject(): Promise<T | undefined>;
+    latestObject(): Promise<T | undefined>;
 }
 export declare class VersionedBaseEntity extends BaseEntity {
     versions(): VersionHelperMethods<this>;

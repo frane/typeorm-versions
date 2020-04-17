@@ -1,5 +1,5 @@
-import { Entity, Column, CreateDateColumn, PrimaryGeneratedColumn, ObjectLiteral, getMetadataArgsStorage, Connection, LessThan, MoreThan } from 'typeorm';
-import { VersionRepository } from '../repository/VersionRepository';
+import { Entity, Column, PrimaryGeneratedColumn, ObjectLiteral, getMetadataArgsStorage, Connection, LessThan, MoreThan, CreateDateColumn, VersionColumn, Raw, Not } from 'typeorm';
+import {SqliteDriver} from 'typeorm/driver/sqlite/SqliteDriver';
 
 export enum VersionEvent {
     INSERT = 'INSERT',
@@ -28,8 +28,17 @@ export class Version {
     @Column({ type: "simple-json" })
     object!: ObjectLiteral;
 
-    @CreateDateColumn()
+    // Ensure all DBs have the same precision
+    // -> important for solid comparison
+    @Column({ precision: 6 })
     timestamp!: Date;
+
+    // @ts-ignore: Unused variable which is actually used
+    private static usedConnection?: Connection;
+
+    static useConnection(connection: Connection) {
+        this.usedConnection = connection;
+    }
 
     protected getConnection() : Connection {
         return (this.constructor as any).usedConnection;
@@ -45,21 +54,35 @@ export class Version {
     }
 
     public previous() : Promise<Version | undefined> {
+        // Date comparison workaround for SQLite
+        let timestampQuery = LessThan(this.timestamp);
+        if (this.getConnection().driver instanceof SqliteDriver) {
+            timestampQuery = Raw(alias => `STRFTIME('%Y-%m-%d %H:%M:%f', ${alias}) < STRFTIME('%Y-%m-%d %H:%M:%f', '${this.timestamp.toISOString()}')`);
+        }
+
         return this.getConnection().getRepository(Version).findOne({ 
             itemId: this.itemId, 
             itemType: this.itemType, 
-            timestamp: LessThan(this.timestamp), 
+            id: Not(this.id),
+            timestamp: timestampQuery, 
         }, {
             order: { timestamp: 'DESC' }
         });
     }
     public next() : Promise<Version | undefined> {
+        // Date comparison workaround for SQLite
+        let timestampQuery = MoreThan(this.timestamp);
+        if (this.getConnection().driver instanceof SqliteDriver) {
+            timestampQuery = Raw(alias => `STRFTIME('%Y-%m-%d %H:%M:%f', ${alias}) > STRFTIME('%Y-%m-%d %H:%M:%f', '${this.timestamp.toISOString()}')`);
+        }
+
         return this.getConnection().getRepository(Version).findOne({ 
             itemId: this.itemId, 
             itemType: this.itemType, 
-            timestamp: MoreThan(this.timestamp), 
+            id: Not(this.id),
+            timestamp: timestampQuery,
         }, {
-            order: { timestamp: 'ASC' }
+            order: { timestamp: 'DESC' }
         });
     }
 

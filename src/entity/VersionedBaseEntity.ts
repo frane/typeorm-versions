@@ -20,8 +20,8 @@ class VersionHelperMethods<T extends BaseEntity> {
         return (await this.getConnection().getCustomRepository(VersionRepository).previousForEntity(this.entity))?.getObject<T>();
     }
 
-    async nextObject() { 
-        return (await this.getConnection().getCustomRepository(VersionRepository).nextForEntity(this.entity))?.getObject<T>(); 
+    async latestObject() { 
+        return (await this.getConnection().getCustomRepository(VersionRepository).latestForEntity(this.entity))?.getObject<T>(); 
     }
 }
 

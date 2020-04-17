@@ -12,6 +12,8 @@ export declare class Version {
     owner: string;
     object: ObjectLiteral;
     timestamp: Date;
+    private static usedConnection?;
+    static useConnection(connection: Connection): void;
     protected getConnection(): Connection;
     getObject<T>(): T;
     previous(): Promise<Version | undefined>;

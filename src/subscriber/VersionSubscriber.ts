@@ -19,7 +19,6 @@ export class VersionSubscriber implements EntitySubscriberInterface {
     }
 
     async beforeRemove(event: RemoveEvent<Object>) {
-        console.log('asadsda', event.entity);
         if (event.entity && isVersionedEntity(event.entity)) {
             await event.connection.getCustomRepository(VersionRepository).saveVersion(event.entity, VersionEvent.REMOVE);
         }

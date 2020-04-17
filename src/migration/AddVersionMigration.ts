@@ -1,4 +1,5 @@
 import {MigrationInterface, QueryRunner, Table} from "typeorm";
+import {SqliteDriver} from 'typeorm/driver/sqlite/SqliteDriver';
 
 export class AddVersionMigration implements MigrationInterface {
 
@@ -38,12 +39,12 @@ export class AddVersionMigration implements MigrationInterface {
                 },
                 {
                     name: "timestamp",
-                    type: "timestamp",
+                    type: queryRunner.connection.driver.mappedDataTypes.createDate as string,
                     isNullable: false,
-                    default: "now()",
+                    precision: 6
                 },
             ],
-        }), true)
+        }), true);
     }
 
     async down(queryRunner: QueryRunner): Promise<void> {

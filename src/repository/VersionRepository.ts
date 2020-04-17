@@ -1,19 +1,35 @@
-import { EntityRepository, Repository, ObjectLiteral } from "typeorm";
+import { EntityRepository, Repository, ObjectLiteral, LessThan, EntityManager } from "typeorm";
 import { Version, VersionEvent } from "../entity/Version";
 
 @EntityRepository(Version)
 export class VersionRepository extends Repository<Version> {
 
-    private buildId<Entity extends ObjectLiteral>(entity: Entity) : string {
-        let id = '';
+    private buildIdFromEntity<Entity extends ObjectLiteral>(entity: Entity) : string {
+        const ids = [];
         for (const pColumn of this.manager.connection.getMetadata(entity.constructor.name).primaryColumns) {
-            id = id + `${pColumn.getEntityValue(entity)}`;	
+            ids.push(pColumn.getEntityValue(entity));	
         }
-        return id;	
+        return ids.join('/');	
+    }
+
+    private buildId(originalId: any) : string | undefined {
+        if (originalId === undefined) {
+            return undefined;
+        }
+
+        if (originalId instanceof Array) {
+            const ids = [];
+            for (const idItem of originalId) {
+                ids.push(this.buildId(idItem));
+            }
+            return ids.join('/');
+        } else {
+            return originalId as string;
+        }
     }
 
     async saveVersion<Entity extends ObjectLiteral>(entity: Entity, event: VersionEvent, owner?: string) {
-        const id = this.buildId(entity)
+        const id = this.buildIdFromEntity(entity)
         if (id?.length < 1)
             return;
 
@@ -23,12 +39,19 @@ export class VersionRepository extends Repository<Version> {
         v.object = entity;
         v.itemId = id;
         v.itemType = entity.constructor.name;
+        // timestamp shuould be defined via @CreateDateColumn, this shouldn't be necessary 
+        // because the value should awlays be set via the DB's default current date-time function.
+        // However, the implementation accross DBs and drivers seems inconsistent, e.g.
+        // SQLite cuts off milliseconds, PostgreSQL is to precise for JS's Date object, 
+        // MySQL differs in procision for a @CreateDateColumn and a simple Date @Column
+        v.timestamp = new Date();
         return this.save(v);
     }
 
-    async allForEntity<Entity extends ObjectLiteral>(entity: Entity, id?: string, take?: number, skip?: number, order: ("ASC" | "DESC") = "DESC") {
+    async allForEntity<Entity extends ObjectLiteral>(entity: Entity, id?: any, take?: number, skip?: number, order: ("ASC" | "DESC") = "DESC") {
+        Version.useConnection(this.manager.connection);
         return this.find({
-            where: { itemType: entity.constructor.name, itemId: id || this.buildId(entity) },
+            where: { itemType: entity.constructor.name, itemId: this.buildId(id) || this.buildIdFromEntity(entity) },
             order: { timestamp: order },
             take: take,
             skip: skip,
@@ -40,9 +63,8 @@ export class VersionRepository extends Repository<Version> {
         return versions.shift();
     }
 
-    async nextForEntity<Entity extends ObjectLiteral>(entity: Entity, id?: string) : Promise<Version | undefined>{
-        const versions = await this.allForEntity(entity, id, 1, 1, "ASC");
+    async latestForEntity<Entity extends ObjectLiteral>(entity: Entity, id?: string) : Promise<Version | undefined> {
+        const versions = await this.allForEntity(entity, id, 1);
         return versions.shift();
     }
-
 }
