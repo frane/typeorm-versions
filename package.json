@@ -1,6 +1,5 @@
 {
   "name": "typeorm-version",
-  "private": true,
   "version": "0.1.0",
   "description": "Entity versioning for TypeORM",
   "license": "MIT",
@@ -24,11 +23,9 @@
     ]
   },
   "scripts": {
-    "test-ci": "gulp ci-tests",
     "test": "rimraf ./lib && tsc && mocha --file ./lib/test/utils/test-setup.js --bail --recursive --timeout 60000 ./lib/test",
     "test-fast": "mocha --file ./lib/test/utils/test-setup.js --bail --recursive --timeout 60000 ./lib/test",
     "compile": "rimraf ./lib && tsc",
-    "package": "gulp package",
     "lint": "tslint -p ."
   },
   "dependencies": {

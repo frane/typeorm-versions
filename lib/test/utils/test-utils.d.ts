@@ -35,6 +35,10 @@ export interface TestingOptions {
      */
     entities?: (string | Function | EntitySchema<any>)[];
     /**
+    * Migrations needs to be included in connection for the given test suite.
+    */
+    migrations?: (string | Function)[];
+    /**
      * Subscribers needs to be included in the connection for the given test suite.
      */
     subscribers?: string[] | Function[];

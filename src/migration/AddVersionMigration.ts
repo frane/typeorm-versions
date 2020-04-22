@@ -1,54 +1,62 @@
 import {MigrationInterface, QueryRunner, Table} from "typeorm";
-import {SqliteDriver} from 'typeorm/driver/sqlite/SqliteDriver';
 
 export class AddVersionMigration implements MigrationInterface {
 
+    tableName: string = "version";
+
     async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.createTable(new Table({
-            name: "version",
+            name: this.tableName,
             columns: [
                 {
                     name: "id",
-                    type: "int",
+                    type: queryRunner.connection.driver.normalizeType({
+                        type: queryRunner.connection.driver.mappedDataTypes.migrationId, // good enough
+                    }),
+                    isGenerated: true,
+                    generationStrategy: "increment",
                     isPrimary: true,
                 },
                 {
                     name: "itemType",
-                    type: "varchar",
+                    type: queryRunner.connection.driver.normalizeType({ type: String }),
                     isNullable: false,
                 },
                 {
                     name: "itemId",
-                    type: "varchar",
+                    type: queryRunner.connection.driver.normalizeType({ type: String }),
                     isNullable: false,
                 },
                 {
                     name: "event",
-                    type: "varchar",
+                    type: queryRunner.connection.driver.normalizeType({ type: String }),
                     isNullable: false,
                 },
                 {
                     name: "owner",
-                    type: "varchar",
+                    type: queryRunner.connection.driver.normalizeType({ type: String }),
                     isNullable: false,
                 },
                 {
                     name: "object",
-                    type: "json",
+                    type: queryRunner.connection.driver.normalizeType({ type: "simple-json" }),
                     isNullable: false,
                 },
                 {
                     name: "timestamp",
-                    type: queryRunner.connection.driver.mappedDataTypes.createDate as string,
+                    type: queryRunner.connection.driver.normalizeType({ 
+                        type: queryRunner.connection.driver.mappedDataTypes.createDate,
+                        precision: queryRunner.connection.driver.mappedDataTypes.createDatePrecision
+                    }),
+                    precision: 6,
                     isNullable: false,
-                    precision: 6
                 },
             ],
         }), true);
     }
 
     async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.dropTable("version");
+        await queryRunner.dropTable(this.tableName);
     }
 
 }
