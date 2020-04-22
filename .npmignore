@@ -1,0 +1,14 @@
+.npmrc
+_npmrc
+./test
+./src
+__test__
+__tests__
+tsconfig.json
+tslint.json
+*.test.d.ts
+*.test.js
+ormconfig.ts
+ormconfig.d.ts
+ormconfig.js
+ormconfig.json

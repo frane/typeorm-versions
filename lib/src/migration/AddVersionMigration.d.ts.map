@@ -1,1 +1,0 @@
-{"version":3,"file":"AddVersionMigration.d.ts","sourceRoot":"","sources":["../../../src/migration/AddVersionMigration.ts"],"names":[],"mappings":"AAAA,OAAO,EAAC,kBAAkB,EAAE,WAAW,EAAQ,MAAM,SAAS,CAAC;AAE/D,qBAAa,mBAAoB,YAAW,kBAAkB;IAE1D,SAAS,EAAE,MAAM,CAAa;IAExB,EAAE,CAAC,WAAW,EAAE,WAAW,GAAG,OAAO,CAAC,IAAI,CAAC;IAmD3C,IAAI,CAAC,WAAW,EAAE,WAAW,GAAG,OAAO,CAAC,IAAI,CAAC;CAItD"}

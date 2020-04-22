@@ -1,5 +1,5 @@
 {
-  "name": "typeorm-version",
+  "name": "typeorm-versions",
   "version": "0.1.0",
   "description": "Entity versioning for TypeORM",
   "license": "MIT",
@@ -8,14 +8,20 @@
     "name": "Frane Bandov",
     "email": "frane@offbyte.com"
   },
-  "main": "./index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/frane/typeorm-version.git"
+    "url": "https://github.com/frane/typeorm-versions.git"
   },
   "bugs": {
-    "url": "https://github.com/frane/typeorm-version/issues"
+    "url": "https://github.com/frane/typeorm-versions/issues"
   },
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.ts",
+    "README.md"
+  ],
   "lint-staged": {
     "*.ts": [
       "tslint --fix",
@@ -23,10 +29,12 @@
     ]
   },
   "scripts": {
-    "test": "rimraf ./lib && tsc && mocha --file ./lib/test/utils/test-setup.js --bail --recursive --timeout 60000 ./lib/test",
-    "test-fast": "mocha --file ./lib/test/utils/test-setup.js --bail --recursive --timeout 60000 ./lib/test",
-    "compile": "rimraf ./lib && tsc",
-    "lint": "tslint -p ."
+    "test": "mocha -r ts-node/register --file ./test/utils/test-setup.ts --bail --recursive --timeout 60000 ./test/**/*test.ts",
+    "clean": "rimraf ./dist",
+    "prebuild": "npm run clean",
+    "build": "tsc",
+    "lint": "tslint -p .",
+    "prepublish": "npm run build"
   },
   "dependencies": {
     "typeorm": "^0.2.24"
