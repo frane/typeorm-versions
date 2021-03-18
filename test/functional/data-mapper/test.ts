@@ -7,12 +7,12 @@ import { VersionRepository, VersionEvent } from "../../../src";
 
 describe("Data Mapper", () => {
 
-    let connections: Connection[];
+    let connections: Connection[] = [];
     before(async () => connections = await createTestingConnections({
         entities: [Post],
     }));
     beforeEach(() => reloadTestingDatabases(connections));
-    after(() => closeTestingConnections(connections));
+    after(() => connections && closeTestingConnections(connections));
 
     it("save 1 item", () => Promise.all(connections.map(async connection => {
         const postRepository = connection.getRepository(Post);

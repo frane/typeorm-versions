@@ -37,7 +37,7 @@
     "prepublish": "npm run build"
   },
   "dependencies": {
-    "typeorm": "^0.2.24"
+    "typeorm": "^0.2.25"
   },
   "devDependencies": {
     "@types/chai": "^4.2.11",
@@ -52,7 +52,7 @@
     "mysql": "^2.18.1",
     "pg": "^8.0.2",
     "rimraf": "^3.0.2",
-    "sqlite3": "^4.1.1",
+    "sqlite3": "^4.2.0",
     "ts-node": "^8.8.2",
     "tslint": "^6.1.1",
     "typescript": "^3.8.3"
