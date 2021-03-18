@@ -160,4 +160,4 @@ class Version1000000000001 extends AddVersionMigration { tableName = "Version100
 - [ ] More tests
 - [ ] More / improve docs
 - [ ] More navigation and recovery features
-- [ ] More xamples
+- [ ] More Examples
