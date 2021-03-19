@@ -1,3 +1,4 @@
+import { ClassConstructor, deserialize, plainToClass } from 'class-transformer';
 import { Entity, Column, PrimaryGeneratedColumn, ObjectLiteral, getMetadataArgsStorage, Connection, LessThan, MoreThan, Raw, Not } from 'typeorm';
 import {SqliteDriver} from 'typeorm/driver/sqlite/SqliteDriver';
 
@@ -47,7 +48,7 @@ export class Version {
     public getObject<T>() : T {
         for (const t of getMetadataArgsStorage().tables) {
             if ((t.target as Function)?.name === this.itemType) {
-                return Object.assign<T, ObjectLiteral>(new (t.target as any)(), this.object);
+                return plainToClass(t.target as ClassConstructor<T>, this.object, { enableImplicitConversion: true });
             }
         }
         return {} as T;

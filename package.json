@@ -20,7 +20,8 @@
   "keywords": [
     "typeorm",
     "versioning",
-    "database"
+    "database",
+    "typescript"
   ],
   "files": [
     "dist/**/*.js",
@@ -42,6 +43,7 @@
     "prepublish": "npm run build"
   },
   "dependencies": {
+    "class-transformer": "^0.4.0",
     "typeorm": "^0.2.31"
   },
   "devDependencies": {

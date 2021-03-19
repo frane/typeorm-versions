@@ -1,3 +1,4 @@
+import { classToPlain, serialize } from "class-transformer";
 import { EntityRepository, Repository, ObjectLiteral, Connection } from "typeorm";
 import { Version, VersionEvent } from "../entity/Version";
 
@@ -41,7 +42,7 @@ export class VersionRepository extends Repository<Version> {
         const v = new Version();
         v.event = event;
         v.owner = owner || 'system';
-        v.object = entity;
+        v.object = classToPlain(entity);
         v.itemId = id;
         v.itemType = entity.constructor.name;
         // timestamp shuould be defined via @CreateDateColumn, this shouldn't be necessary 
@@ -71,5 +72,13 @@ export class VersionRepository extends Repository<Version> {
     async latestForEntity<Entity extends ObjectLiteral>(entity: Entity, id?: string) : Promise<Version | undefined> {
         const versions = await this.allForEntity(entity, id, 1);
         return versions.shift();
+    }
+
+    async previousObjectForEntity<Entity extends ObjectLiteral>(entity: Entity, id?: string) : Promise<Entity | undefined> {
+        return (await this.previousForEntity(entity, id))?.getObject<Entity>();
+    }
+
+    async latestObjectForEntity<Entity extends ObjectLiteral>(entity: Entity, id?: string) : Promise<Entity | undefined> {
+        return (await this.latestForEntity(entity, id))?.getObject<Entity>();
     }
 }

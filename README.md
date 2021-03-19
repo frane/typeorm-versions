@@ -79,6 +79,8 @@ await postRepository.save(post);
 const versionRepository = connection.getCustomRepository(VersionRepository);
 const previousVersion = await versionRepository.previousForEntity(post);
 const latestVersion = await versionRepository.latestForEntity(post)
+const previousPost = await versionRepository.previousObjectForEntity(post); // Get the entity object directly instead of the version
+const latestPost = await versionRepository.latestObjectForEntity(post);
 ```
 
 TypeORM-Versions also works with the active record pattern
