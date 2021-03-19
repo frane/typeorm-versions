@@ -17,6 +17,7 @@
   "bugs": {
     "url": "https://github.com/frane/typeorm-versions/issues"
   },
+  "keywords": ["typeorm", "versioning", "database"],
   "files": [
     "dist/**/*.js",
     "dist/**/*.ts",

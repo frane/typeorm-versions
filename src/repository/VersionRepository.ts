@@ -1,8 +1,12 @@
-import { EntityRepository, Repository, ObjectLiteral, LessThan, EntityManager } from "typeorm";
+import { EntityRepository, Repository, ObjectLiteral, Connection } from "typeorm";
 import { Version, VersionEvent } from "../entity/Version";
 
 @EntityRepository(Version)
 export class VersionRepository extends Repository<Version> {
+
+    private getConnection<Entity extends ObjectLiteral>(entity: Entity): Connection {
+        return (entity.constructor as any).usedConnection || this.manager.connection;
+    }
 
     private buildIdFromEntity<Entity extends ObjectLiteral>(entity: Entity) : string {
         const ids = [];
@@ -29,6 +33,7 @@ export class VersionRepository extends Repository<Version> {
     }
 
     async saveVersion<Entity extends ObjectLiteral>(entity: Entity, event: VersionEvent, owner?: string) {
+        Version.useConnection(this.getConnection(entity));
         const id = this.buildIdFromEntity(entity)
         if (id?.length < 1)
             return;
@@ -49,8 +54,8 @@ export class VersionRepository extends Repository<Version> {
     }
 
     async allForEntity<Entity extends ObjectLiteral>(entity: Entity, id?: any, take?: number, skip?: number, order: ("ASC" | "DESC") = "DESC") {
-        Version.useConnection(this.manager.connection);
-        return this.find({
+        Version.useConnection(this.getConnection(entity));
+        return await this.find({
             where: { itemType: entity.constructor.name, itemId: this.buildId(id) || this.buildIdFromEntity(entity) },
             order: { timestamp: order },
             take: take,

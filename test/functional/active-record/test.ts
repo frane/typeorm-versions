@@ -3,27 +3,27 @@ import { expect } from "chai";
 import { closeTestingConnections, createTestingConnections, reloadTestingDatabases } from "../../utils/test-utils";
 import { Connection } from "typeorm";
 import { Post } from "./entity/Post";
-import { VersionRepository, VersionEvent } from "../../../src";
+import { Version, VersionEvent } from "../../../src";
 
-describe("Data Mapper", () => {
+describe("Active Record", () => {
 
     let connections: Connection[] = [];
     before(async () => connections = await createTestingConnections({
-        entities: [Post],
+        entities: [Post, Version],
     }));
     beforeEach(() => reloadTestingDatabases(connections));
     after(() => connections && closeTestingConnections(connections));
 
     it("save 1 item", () => Promise.all(connections.map(async connection => {
-        const postRepository = connection.getRepository(Post);
-
+        Post.useConnection(connection);
+        
         let post = new Post();
         post.title = "hello";
         post.content = "World";
-        post = await postRepository.save(post);
+        await post.save();
 
-        const versionRepository = connection.getCustomRepository(VersionRepository);
-        const versions = await versionRepository.allForEntity(post);
+        const versions = await post.versions().list();
+        console.log(versions);
 
         expect(versions.length).to.equal(1);
         expect(versions[0].event).to.equal(VersionEvent.INSERT);
@@ -32,20 +32,19 @@ describe("Data Mapper", () => {
     })));
 
     it("save 2 items", () => Promise.all(connections.map(async connection => {
-        const postRepository = connection.getRepository(Post);
+        Post.useConnection(connection);
 
         let post = new Post();
         post.title = "hello";
         post.content = "World";
-        await postRepository.save(post);
+        await post.save();
 
         let post2 = new Post();
         post2.title = "hello";
         post2.content = "again";
-        post2 = await postRepository.save(post2);
+        await post2.save();
 
-        const versionRepository = connection.getCustomRepository(VersionRepository);
-        const versions = await versionRepository.allForEntity(post2);
+        const versions = await post2.versions().list();
 
         expect(versions.length).to.equal(1);
         expect(versions[0].event).to.equal(VersionEvent.INSERT);
@@ -54,18 +53,17 @@ describe("Data Mapper", () => {
     })));
 
     it("update item", () => Promise.all(connections.map(async connection => {
-        const postRepository = connection.getRepository(Post);
+        Post.useConnection(connection);
 
         let post = new Post();
         post.title = "hello";
         post.content = "World";
-        post = await postRepository.save(post);
+        await post.save();
 
         post.content = "there!";
-        post = await postRepository.save(post);
+        await post.save();
 
-        const versionRepository = connection.getCustomRepository(VersionRepository);
-        const versions = await versionRepository.allForEntity(post);
+        const versions = await post.versions().list();
         
         expect(versions.length).to.equal(2);
         expect(versions[0].event).to.equal(VersionEvent.UPDATE, `failed for ${connection.name}`);
@@ -74,19 +72,18 @@ describe("Data Mapper", () => {
     })));
 
     it("remove item", () => Promise.all(connections.map(async connection => {
-        const postRepository = connection.getRepository(Post);
+        Post.useConnection(connection);
 
         let post = new Post();
         post.title = "hello";
         post.content = "World";
-        post = await postRepository.save(post);
+        await post.save();
 
         const postId = post.id;
 
-        await postRepository.remove(post);
+        await post.remove();
 
-        const versionRepository = connection.getCustomRepository(VersionRepository);
-        const versions = await versionRepository.allForEntity(post, postId);
+        const versions = await post.versions().list();
 
         expect(versions.length).to.equal(2, `failed for ${connection.name}`);
         expect(versions[0].event).to.equal(VersionEvent.REMOVE);
@@ -95,43 +92,40 @@ describe("Data Mapper", () => {
     })));
 
     it("recover item", () => Promise.all(connections.map(async connection => { 
-        const postRepository = connection.getRepository(Post);
+        Post.useConnection(connection);
 
         let post = new Post();
         post.title = "Hello";
         post.content = "World";
-        post = await postRepository.save(post);
+        await post.save();
 
         post.title = "Bye";
-        post = await postRepository.save(post);
+        await post.save();
 
-        const versionRepository = connection.getCustomRepository(VersionRepository);
-        const previousVersion = await versionRepository.previousForEntity(post);
+        const previousPost = await post.versions().previousObject();
 
-        expect(previousVersion).to.not.equal(undefined);
+        expect(previousPost).to.not.equal(undefined);
         
-        post = previousVersion!.getObject<Post>();
-        await postRepository.save(post);
+        await previousPost!.save();
 
-        const versions = await versionRepository.allForEntity(post);
+        const versions = await post.versions().list();
         expect(versions.length).to.eq(3, `failed for ${connection.name}`);
-        expect(await postRepository.count()).to.equal(1);
+        expect(await Post.count()).to.equal(1);
     })));
 
     it("version navigation", () => Promise.all(connections.map(async connection => { 
-        const postRepository = connection.getRepository(Post);
+        Post.useConnection(connection);
 
         let post = new Post();
         post.title = "Hello";
         post.content = "World";
-        post = await postRepository.save(post);
+        await post.save();
 
         post.title = "Bye";
-        post = await postRepository.save(post);
+        await post.save();
 
-        const versionRepository = connection.getCustomRepository(VersionRepository);
-        const previousVersion = await versionRepository.previousForEntity(post);
-        const latestVersion = await versionRepository.latestForEntity(post);
+        const previousVersion = await post.versions().previous();
+        const latestVersion = await post.versions().latest();
 
         expect((await previousVersion!.next())!.id).to.equal(latestVersion!.id, `failed for ${connection.name}`);
         expect((await latestVersion!.previous())!.id).to.equal(previousVersion!.id, `failed for ${connection.name}`);

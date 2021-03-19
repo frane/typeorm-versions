@@ -124,11 +124,11 @@ In your ormconfig.json add
 ```json
 {
     ...
-    entities: [
+    "entities": [
         "entity/*.js",
         "./node_modules/typeorm-version/dist/entity/Version.js" 
     ],
-    subscribers: [
+    "subscribers": [
         "subscriber/*.js",
         "./node_modules/typeorm-version/dist/subscribers/VersionSubscriber.js"
     ],
@@ -160,4 +160,4 @@ class Version1000000000001 extends AddVersionMigration { tableName = "Version100
 - [ ] More tests
 - [ ] More / improve docs
 - [ ] More navigation and recovery features
-- [ ] More Examples
+- [ ] More examples
