@@ -106,8 +106,11 @@ class Post extends VersionedBaseEntity{
 // Which provides helper methods like...
 let post = Post.find(1);
 post.versions().list(); // List all all versions
-post.versions().previousObject();
+post.versions().previous();
+post.versions().latest();
+post.versions().previousObject(); // Get the object instead of version
 post.versions().latestObject();
+
 
 ```
 

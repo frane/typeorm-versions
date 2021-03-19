@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, ObjectLiteral, getMetadataArgsStorage, Connection, LessThan, MoreThan, CreateDateColumn, VersionColumn, Raw, Not } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ObjectLiteral, getMetadataArgsStorage, Connection, LessThan, MoreThan, Raw, Not } from 'typeorm';
 import {SqliteDriver} from 'typeorm/driver/sqlite/SqliteDriver';
 
 export enum VersionEvent {
@@ -47,7 +47,7 @@ export class Version {
     public getObject<T>() : T {
         for (const t of getMetadataArgsStorage().tables) {
             if ((t.target as Function)?.name === this.itemType) {
-                return Object.assign(new (t.target as any)(), this.object);
+                return Object.assign<T, ObjectLiteral>(new (t.target as any)(), this.object);
             }
         }
         return {} as T;

@@ -9,10 +9,10 @@ describe("Active Record", () => {
 
     let connections: Connection[] = [];
     before(async () => connections = await createTestingConnections({
-        entities: [Post, Version],
+        entities: [Post],
     }));
     beforeEach(() => reloadTestingDatabases(connections));
-    after(() => connections && closeTestingConnections(connections));
+    after(() => closeTestingConnections(connections));
 
     it("save 1 item", () => Promise.all(connections.map(async connection => {
         Post.useConnection(connection);
@@ -23,7 +23,6 @@ describe("Active Record", () => {
         await post.save();
 
         const versions = await post.versions().list();
-        console.log(versions);
 
         expect(versions.length).to.equal(1);
         expect(versions[0].event).to.equal(VersionEvent.INSERT);
@@ -65,7 +64,7 @@ describe("Active Record", () => {
 
         const versions = await post.versions().list();
         
-        expect(versions.length).to.equal(2);
+        expect(versions.length).to.equal(2, `failed for ${connection.name}`);
         expect(versions[0].event).to.equal(VersionEvent.UPDATE, `failed for ${connection.name}`);
         expect(versions[0].itemId).to.equal(post.id.toString());
         expect(versions[0].itemType).to.equal(post.constructor.name);
@@ -83,6 +82,7 @@ describe("Active Record", () => {
 
         await post.remove();
 
+        post.id = postId; // object loses id after removal, add it back to fetch versions
         const versions = await post.versions().list();
 
         expect(versions.length).to.equal(2, `failed for ${connection.name}`);

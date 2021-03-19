@@ -13,9 +13,7 @@ class VersionHelperMethods<T extends BaseEntity> {
     }
 
     async list() { 
-        const x = await this.getConnection().getCustomRepository(VersionRepository).allForEntity(this.entity);
-        console.log('a', x);
-        return x;
+        return this.getConnection().getCustomRepository(VersionRepository).allForEntity(this.entity);
     }
 
     async previous() { 

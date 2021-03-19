@@ -17,7 +17,11 @@
   "bugs": {
     "url": "https://github.com/frane/typeorm-versions/issues"
   },
-  "keywords": ["typeorm", "versioning", "database"],
+  "keywords": [
+    "typeorm",
+    "versioning",
+    "database"
+  ],
   "files": [
     "dist/**/*.js",
     "dist/**/*.ts",
@@ -38,24 +42,24 @@
     "prepublish": "npm run build"
   },
   "dependencies": {
-    "typeorm": "^0.2.25"
+    "typeorm": "^0.2.31"
   },
   "devDependencies": {
     "@types/chai": "^4.2.11",
     "@types/chai-as-promised": "^7.1.2",
-    "@types/mocha": "^7.0.2",
-    "@types/node": "^13.11.1",
+    "@types/mocha": "^8.2.1",
+    "@types/node": "^14.14.35",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
-    "mocha": "^7.1.1",
+    "mocha": "^8.3.2",
     "mongodb": "^3.5.6",
     "mssql": "^6.2.0",
     "mysql": "^2.18.1",
     "pg": "^8.0.2",
     "rimraf": "^3.0.2",
-    "sqlite3": "^4.2.0",
-    "ts-node": "^8.8.2",
+    "sqlite3": "^5.0.2",
+    "ts-node": "^9.1.1",
     "tslint": "^6.1.1",
-    "typescript": "^3.8.3"
+    "typescript": "^4.2.3"
   }
 }

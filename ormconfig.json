@@ -1,6 +1,6 @@
 [
   {
-    "skip": false,
+    "skip": true,
     "name": "mysql",
     "type": "mysql",
     "host": "localhost",
@@ -11,7 +11,7 @@
     "logging": false
   },
   {
-    "skip": false,
+    "skip": true,
     "name": "mariadb",
     "type": "mariadb",
     "host": "localhost",
@@ -29,7 +29,7 @@
     "logging": false
   },
   {
-    "skip": false,
+    "skip": true,
     "name": "postgres",
     "type": "postgres",
     "host": "localhost",
@@ -61,7 +61,7 @@
     "logging": false
   },
   {
-    "skip": false,
+    "skip": true,
     "name": "cockroachdb",
     "type": "cockroachdb",
     "host": "localhost",
