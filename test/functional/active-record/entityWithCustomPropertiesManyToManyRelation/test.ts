@@ -5,13 +5,14 @@ import { closeTestingConnections, createTestingConnections, reloadTestingDatabas
 import { Connection } from "typeorm";
 import { Post } from "./Post";
 import { Category } from "./Category";
-import { Version, VersionEvent } from "../../../../src";
+import { VersionEvent } from "../../../../src";
+import { PostToCategory } from './PostToCategory';
 
-describe("Active Record - Entity with ManyToMany relation", () => {
+describe("Active Record - Entity with custom properties ManyToMany relation", () => {
 
     let connections: Connection[] = [];
     before(async () => connections = await createTestingConnections({
-        entities: [Post, Category],
+        entities: [Post, Category, PostToCategory],
     }));
     beforeEach(() => reloadTestingDatabases(connections));
     after(() => closeTestingConnections(connections));
@@ -20,13 +21,18 @@ describe("Active Record - Entity with ManyToMany relation", () => {
         Post.useConnection(connection);
         Category.useConnection(connection);
 
+        const postToCategory = new PostToCategory()
+        postToCategory.active = false;
+
         const category = new Category();
         category.name = 'foo';
+
+        postToCategory.category = category;
 
         let post = new Post();
         post.title = "hello";
         post.content = "World"
-        post.categories = [category];
+        post.postToCategories = [postToCategory];
         await post.save();
 
         const postsVersions = await post.versions().list();
@@ -41,24 +47,30 @@ describe("Active Record - Entity with ManyToMany relation", () => {
         expect(categoriesVersions[0].event).to.equal(VersionEvent.INSERT, `failed for ${connection.name}`);
         expect(categoriesVersions[0].itemId).to.equal(category.id.toString());
         expect(categoriesVersions[0].itemType).to.equal(category.constructor.name);
-    })));
 
+    })));
     it("save 2 items", () => Promise.all(connections.map(async connection => {
         Post.useConnection(connection);
         Category.useConnection(connection);
 
+        const postToCategory = new PostToCategory()
+        postToCategory.active = false;
+
         const category = new Category();
         category.name = 'foo';
 
+        postToCategory.category = category;
+
         let post = new Post();
         post.title = "hello";
-        post.content = "World";
-        post.categories = [category];
+        post.content = "World"
+        post.postToCategories = [postToCategory];
         await post.save();
 
         let post2 = new Post();
         post2.title = "hello";
         post2.content = "again";
+        post2.postToCategories = [postToCategory]
         await post2.save();
 
         const postsVersions = await post2.versions().list();
@@ -79,13 +91,18 @@ describe("Active Record - Entity with ManyToMany relation", () => {
         Post.useConnection(connection);
         Category.useConnection(connection);
 
+        const postToCategory = new PostToCategory()
+        postToCategory.active = false;
+
         const category = new Category();
         category.name = 'foo';
 
+        postToCategory.category = category;
+
         let post = new Post();
         post.title = "hello";
-        post.content = "World";
-        post.categories = [category];
+        post.content = "World"
+        post.postToCategories = [postToCategory];
         await post.save();
 
         post.content = "there!";
@@ -109,13 +126,18 @@ describe("Active Record - Entity with ManyToMany relation", () => {
         Post.useConnection(connection);
         Category.useConnection(connection);
 
+        const postToCategory = new PostToCategory()
+        postToCategory.active = false;
+
         const category = new Category();
         category.name = 'foo';
 
+        postToCategory.category = category;
+
         let post = new Post();
         post.title = "hello";
-        post.content = "World";
-        post.categories = [category];
+        post.content = "World"
+        post.postToCategories = [postToCategory];
         await post.save();
 
         const postId = post.id;
@@ -141,13 +163,18 @@ describe("Active Record - Entity with ManyToMany relation", () => {
         Post.useConnection(connection);
         Category.useConnection(connection);
 
+        const postToCategory = new PostToCategory()
+        postToCategory.active = false;
+
         const category = new Category();
         category.name = 'foo';
 
+        postToCategory.category = category;
+
         let post = new Post();
-        post.title = "Hello";
-        post.content = "World";
-        post.categories = [category];
+        post.title = "hello";
+        post.content = "World"
+        post.postToCategories = [postToCategory];
         await post.save();
 
         post.title = "Bye";
