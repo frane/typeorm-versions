@@ -1,6 +1,6 @@
 {
   "name": "typeorm-versions",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Entity versioning for TypeORM",
   "license": "MIT",
   "readmeFilename": "README.md",
