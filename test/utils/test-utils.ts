@@ -240,11 +240,12 @@ export function setupTestingConnections(options?: TestingOptions): ConnectionOpt
         }).map(connctionOptions => versionsConfig(connctionOptions)); // inject versions stuff
 }
 
+
 /**
  * Creates a testing connections based on the configuration in the ormconfig.json
  * and given options that can override some of its configuration for the test-specific use case.
  */
-export async function createTestingConnections(options?: TestingOptions): Promise<Connection[]> {
+ export async function createTestingConnections(options?: TestingOptions): Promise<Connection[]> {
     const connections = await createConnections(setupTestingConnections(options));
     await Promise.all(connections.map(async connection => {
         // create new databases
@@ -261,22 +262,33 @@ export async function createTestingConnections(options?: TestingOptions): Promis
         }
 
         // create new schemas
-        if (connection.driver instanceof PostgresDriver || connection.driver instanceof SqlServerDriver) {
-            const schemaPaths: string[] = [];
-            connection.entityMetadatas
-                .filter(entityMetadata => !!entityMetadata.schemaPath)
-                .forEach(entityMetadata => {
-                    const existSchemaPath = schemaPaths.find(path => path === entityMetadata.schemaPath);
-                    if (!existSchemaPath)
-                        schemaPaths.push(entityMetadata.schemaPath!);
-                });
+        const schemaPaths: Set<string> = new Set();
+        connection.entityMetadatas
+            .filter(entityMetadata => !!entityMetadata.schema)
+            .forEach(entityMetadata => {
+                let schema = entityMetadata.schema!;
 
-            const schema = connection.driver.options.schema;
-            if (schema && schemaPaths.indexOf(schema) === -1)
-                schemaPaths.push(schema);
+                if (entityMetadata.database) {
+                    schema = `${entityMetadata.database}.${schema}`;
+                }
 
-            for (const schemaPath of schemaPaths) {
+                schemaPaths.add(schema);
+            });
+
+        const schema =
+            connection.driver.options?.hasOwnProperty("schema") ?
+                (connection.driver.options as any).schema :
+                undefined;
+
+        if (schema) {
+            schemaPaths.add(schema);
+        }
+
+        for (const schemaPath of schemaPaths) {
+            try {
                 await queryRunner.createSchema(schemaPath, true);
+            } catch (e) {
+                // Do nothing
             }
         }
 

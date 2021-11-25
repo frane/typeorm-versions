@@ -13,7 +13,7 @@ export class VersionSubscriber implements EntitySubscriberInterface {
     }
 
     async afterUpdate(event: UpdateEvent<Object>) {
-        if (isVersionedEntity(event.entity)) {
+        if (event.entity && isVersionedEntity(event.entity)) {
             await event.connection.getCustomRepository(VersionRepository).saveVersion(event.entity, VersionEvent.UPDATE);
         }
     }

@@ -2,7 +2,7 @@ import "reflect-metadata";
 import { expect } from "chai";
 import { closeTestingConnections, createTestingConnections, reloadTestingDatabases } from "../../utils/test-utils";
 import { Connection } from "typeorm";
-import { VersionRepository, VersionEvent } from "../../../src";
+import { VersionRepository } from "../../../src";
 import { Foo } from "./entity/Foo";
 
 

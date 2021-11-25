@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, PrimaryColumn } from 'typeorm';
+import { Entity, Column, PrimaryColumn } from 'typeorm';
 import { VersionedEntity } from '../../../../src';
 
 @Entity()
@@ -15,14 +15,14 @@ export class Foo {
     d: Date = new Date(0);
     
     @Column({ type: 'simple-json' })
-    @Type(() => Bar)
+    @Type(() => Bar) // required to keep maintain type-safety
     bar: Bar = new Bar();
 }
 
 export class Bar {
     x: number = 1;
 
-    @Type(() => Baz)
+    @Type(() => Baz) // required to keep maintain type-safety
     b: Baz = new Baz();
 }
 
