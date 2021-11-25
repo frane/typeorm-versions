@@ -1,11 +1,12 @@
 import "reflect-metadata";
+import "mocha";
 import { expect } from "chai";
-import { closeTestingConnections, createTestingConnections, reloadTestingDatabases } from "../../utils/test-utils";
+import { closeTestingConnections, createTestingConnections, reloadTestingDatabases } from "../../../utils/test-utils";
 import { Connection } from "typeorm";
-import { Post } from "./entity/Post";
-import { Version, VersionEvent } from "../../../src";
+import { Post } from "./Post";
+import { Version, VersionEvent } from "../../../../src";
 
-describe("Active Record", () => {
+describe("Active Record - Simple entity", () => {
 
     let connections: Connection[] = [];
     before(async () => connections = await createTestingConnections({
@@ -16,7 +17,7 @@ describe("Active Record", () => {
 
     it("save 1 item", () => Promise.all(connections.map(async connection => {
         Post.useConnection(connection);
-        
+
         let post = new Post();
         post.title = "hello";
         post.content = "World";
@@ -63,7 +64,7 @@ describe("Active Record", () => {
         await post.save();
 
         const versions = await post.versions().list();
-        
+
         expect(versions.length).to.equal(2, `failed for ${connection.name}`);
         expect(versions[0].event).to.equal(VersionEvent.UPDATE, `failed for ${connection.name}`);
         expect(versions[0].itemId).to.equal(post.id.toString());
@@ -91,7 +92,7 @@ describe("Active Record", () => {
         expect(versions[0].itemType).to.equal(post.constructor.name);
     })));
 
-    it("recover item", () => Promise.all(connections.map(async connection => { 
+    it("recover item", () => Promise.all(connections.map(async connection => {
         Post.useConnection(connection);
 
         let post = new Post();
@@ -105,7 +106,7 @@ describe("Active Record", () => {
         const previousPost = await post.versions().previousObject();
 
         expect(previousPost).to.not.equal(undefined);
-        
+
         await previousPost!.save();
 
         const versions = await post.versions().list();
@@ -113,7 +114,7 @@ describe("Active Record", () => {
         expect(await Post.count()).to.equal(1);
     })));
 
-    it("version navigation", () => Promise.all(connections.map(async connection => { 
+    it("version navigation", () => Promise.all(connections.map(async connection => {
         Post.useConnection(connection);
 
         let post = new Post();
@@ -128,10 +129,10 @@ describe("Active Record", () => {
         const latestVersion = await post.versions().latest();
 
         expect((await previousVersion!.next())!.id).to.equal(latestVersion!.id, `failed for ${connection.name}`);
-        expect((await latestVersion!.previous())!.id).to.equal(previousVersion!.id, `failed for ${connection.name}`);
+        expect((await latestVersion!.previous())!.id).to
+          .equal(previousVersion!.id, `failed for ${connection.name}`);
 
         expect(await previousVersion!.previous()).to.equal(undefined, `failed for ${connection.name}`);
         expect(await latestVersion!.next()).to.equal(undefined, `failed for ${connection.name}`);
     })));
-
 });
