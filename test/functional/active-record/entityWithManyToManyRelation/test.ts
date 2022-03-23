@@ -17,8 +17,8 @@ describe("Active Record - Entity with ManyToMany relation", () => {
     after(() => closeTestingConnections(connections));
 
     it("save 1 item", () => Promise.all(connections.map(async connection => {
-        Post.useConnection(connection);
-        Category.useConnection(connection);
+        Post.useDataSource(connection);
+        Category.useDataSource(connection);
 
         const category = new Category();
         category.name = 'foo';
@@ -44,8 +44,8 @@ describe("Active Record - Entity with ManyToMany relation", () => {
     })));
 
     it("save 2 items", () => Promise.all(connections.map(async connection => {
-        Post.useConnection(connection);
-        Category.useConnection(connection);
+        Post.useDataSource(connection);
+        Category.useDataSource(connection);
 
         const category = new Category();
         category.name = 'foo';
@@ -76,8 +76,8 @@ describe("Active Record - Entity with ManyToMany relation", () => {
     })));
 
     it("update item", () => Promise.all(connections.map(async connection => {
-        Post.useConnection(connection);
-        Category.useConnection(connection);
+        Post.useDataSource(connection);
+        Category.useDataSource(connection);
 
         const category = new Category();
         category.name = 'foo';
@@ -106,8 +106,8 @@ describe("Active Record - Entity with ManyToMany relation", () => {
     })));
 
     it("remove item", () => Promise.all(connections.map(async connection => {
-        Post.useConnection(connection);
-        Category.useConnection(connection);
+        Post.useDataSource(connection);
+        Category.useDataSource(connection);
 
         const category = new Category();
         category.name = 'foo';
@@ -138,8 +138,8 @@ describe("Active Record - Entity with ManyToMany relation", () => {
     })));
 
     it("version navigation", () => Promise.all(connections.map(async connection => {
-        Post.useConnection(connection);
-        Category.useConnection(connection);
+        Post.useDataSource(connection);
+        Category.useDataSource(connection);
 
         const category = new Category();
         category.name = 'foo';
@@ -160,7 +160,7 @@ describe("Active Record - Entity with ManyToMany relation", () => {
         expect((await latestVersion!.previous())!.id).to
           .equal(previousVersion!.id, `failed for ${connection.name}`);
 
-        expect(await previousVersion!.previous()).to.equal(undefined, `failed for ${connection.name}`);
-        expect(await latestVersion!.next()).to.equal(undefined, `failed for ${connection.name}`);
+        expect(await previousVersion!.previous()).to.equal(null, `failed for ${connection.name}`);
+        expect(await latestVersion!.next()).to.equal(null, `failed for ${connection.name}`);
     })));
 });

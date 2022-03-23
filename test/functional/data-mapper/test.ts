@@ -22,7 +22,7 @@ describe("Data Mapper", () => {
         post.content = "World";
         post = await postRepository.save(post);
 
-        const versionRepository = connection.getCustomRepository(VersionRepository);
+        const versionRepository = VersionRepository(connection)
         const versions = await versionRepository.allForEntity(post);
 
         expect(versions.length).to.equal(1);
@@ -44,7 +44,7 @@ describe("Data Mapper", () => {
         post2.content = "again";
         post2 = await postRepository.save(post2);
 
-        const versionRepository = connection.getCustomRepository(VersionRepository);
+        const versionRepository = VersionRepository(connection)
         const versions = await versionRepository.allForEntity(post2);
 
         expect(versions.length).to.equal(1);
@@ -64,9 +64,9 @@ describe("Data Mapper", () => {
         post.content = "there!";
         post = await postRepository.save(post);
 
-        const versionRepository = connection.getCustomRepository(VersionRepository);
+        const versionRepository = VersionRepository(connection)
         const versions = await versionRepository.allForEntity(post);
-        
+
         expect(versions.length).to.equal(2);
         expect(versions[0].event).to.equal(VersionEvent.UPDATE, `failed for ${connection.name}`);
         expect(versions[0].itemId).to.equal(post.id.toString());
@@ -85,7 +85,7 @@ describe("Data Mapper", () => {
 
         await postRepository.remove(post);
 
-        const versionRepository = connection.getCustomRepository(VersionRepository);
+        const versionRepository = VersionRepository(connection)
         const versions = await versionRepository.allForEntity(post, postId);
 
         expect(versions.length).to.equal(2, `failed for ${connection.name}`);
@@ -94,7 +94,7 @@ describe("Data Mapper", () => {
         expect(versions[0].itemType).to.equal(post.constructor.name);
     })));
 
-    it("recover item", () => Promise.all(connections.map(async connection => { 
+    it("recover item", () => Promise.all(connections.map(async connection => {
         const postRepository = connection.getRepository(Post);
 
         let post = new Post();
@@ -105,11 +105,11 @@ describe("Data Mapper", () => {
         post.title = "Bye";
         post = await postRepository.save(post);
 
-        const versionRepository = connection.getCustomRepository(VersionRepository);
+        const versionRepository = VersionRepository(connection)
         const previousVersion = await versionRepository.previousForEntity(post);
 
         expect(previousVersion).to.not.equal(undefined);
-        
+
         post = previousVersion!.getObject<Post>();
         await postRepository.save(post);
 
@@ -118,7 +118,7 @@ describe("Data Mapper", () => {
         expect(await postRepository.count()).to.equal(1);
     })));
 
-    it("version navigation", () => Promise.all(connections.map(async connection => { 
+    it("version navigation", () => Promise.all(connections.map(async connection => {
         const postRepository = connection.getRepository(Post);
 
         let post = new Post();
@@ -129,15 +129,15 @@ describe("Data Mapper", () => {
         post.title = "Bye";
         post = await postRepository.save(post);
 
-        const versionRepository = connection.getCustomRepository(VersionRepository);
+        const versionRepository = VersionRepository(connection)
         const previousVersion = await versionRepository.previousForEntity(post);
         const latestVersion = await versionRepository.latestForEntity(post);
 
         expect((await previousVersion!.next())!.id).to.equal(latestVersion!.id, `failed for ${connection.name}`);
         expect((await latestVersion!.previous())!.id).to.equal(previousVersion!.id, `failed for ${connection.name}`);
 
-        expect(await previousVersion!.previous()).to.equal(undefined, `failed for ${connection.name}`);
-        expect(await latestVersion!.next()).to.equal(undefined, `failed for ${connection.name}`);
+        expect(await previousVersion!.previous()).to.equal(null, `failed for ${connection.name}`);
+        expect(await latestVersion!.next()).to.equal(null, `failed for ${connection.name}`);
     })));
 
 });

@@ -2,15 +2,15 @@ import "reflect-metadata";
 import "mocha";
 import { expect } from "chai";
 import { closeTestingConnections, createTestingConnections, reloadTestingDatabases } from "../../../utils/test-utils";
-import { Connection } from "typeorm";
 import { Post } from "./Post";
 import { Category } from "./Category";
 import { VersionEvent } from "../../../../src";
 import { PostToCategory } from './PostToCategory';
+import { DataSource } from 'typeorm/data-source/DataSource';
 
 describe("Active Record - Entity with custom properties ManyToMany relation", () => {
 
-    let connections: Connection[] = [];
+    let connections: DataSource[] = [];
     before(async () => connections = await createTestingConnections({
         entities: [Post, Category, PostToCategory],
     }));
@@ -18,8 +18,8 @@ describe("Active Record - Entity with custom properties ManyToMany relation", ()
     after(() => closeTestingConnections(connections));
 
     it("save 1 item", () => Promise.all(connections.map(async connection => {
-        Post.useConnection(connection);
-        Category.useConnection(connection);
+        Post.useDataSource(connection);
+        Category.useDataSource(connection);
 
         const postToCategory = new PostToCategory()
         postToCategory.active = false;
@@ -50,8 +50,8 @@ describe("Active Record - Entity with custom properties ManyToMany relation", ()
 
     })));
     it("save 2 items", () => Promise.all(connections.map(async connection => {
-        Post.useConnection(connection);
-        Category.useConnection(connection);
+        Post.useDataSource(connection);
+        Category.useDataSource(connection);
 
         const postToCategory = new PostToCategory()
         postToCategory.active = false;
@@ -88,8 +88,8 @@ describe("Active Record - Entity with custom properties ManyToMany relation", ()
     })));
 
     it("update item", () => Promise.all(connections.map(async connection => {
-        Post.useConnection(connection);
-        Category.useConnection(connection);
+        Post.useDataSource(connection);
+        Category.useDataSource(connection);
 
         const postToCategory = new PostToCategory()
         postToCategory.active = false;
@@ -123,8 +123,8 @@ describe("Active Record - Entity with custom properties ManyToMany relation", ()
     })));
 
     it("remove item", () => Promise.all(connections.map(async connection => {
-        Post.useConnection(connection);
-        Category.useConnection(connection);
+        Post.useDataSource(connection);
+        Category.useDataSource(connection);
 
         const postToCategory = new PostToCategory()
         postToCategory.active = false;
@@ -160,8 +160,8 @@ describe("Active Record - Entity with custom properties ManyToMany relation", ()
     })));
 
     it("version navigation", () => Promise.all(connections.map(async connection => {
-        Post.useConnection(connection);
-        Category.useConnection(connection);
+        Post.useDataSource(connection);
+        Category.useDataSource(connection);
 
         const postToCategory = new PostToCategory()
         postToCategory.active = false;
@@ -187,7 +187,7 @@ describe("Active Record - Entity with custom properties ManyToMany relation", ()
         expect((await latestVersion!.previous())!.id).to
           .equal(previousVersion!.id, `failed for ${connection.name}`);
 
-        expect(await previousVersion!.previous()).to.equal(undefined, `failed for ${connection.name}`);
-        expect(await latestVersion!.next()).to.equal(undefined, `failed for ${connection.name}`);
+        expect(await previousVersion!.previous()).to.equal(null, `failed for ${connection.name}`);
+        expect(await latestVersion!.next()).to.equal(null, `failed for ${connection.name}`);
     })));
 });

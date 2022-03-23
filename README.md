@@ -2,6 +2,8 @@
 
 A [paper_trail](https://github.com/paper-trail-gem/paper_trail) inspired versioning plugin for [TypeORM](https://typeorm.io/) to track changes in entities.
 
+**Compatible with typeORM => 0.3**
+
 ## Usage
 
 Define your entity and annotate it with the `@VersionedEntity()` decorator.
@@ -30,7 +32,7 @@ At any other point in your code use it like
 
 ```typescript
 // Repository pattern
-const postRepository = connection.getRepository(Post);
+const postRepository = dataSource.getRepository(Post);
 
 // Store a post
 let post = new Post();
@@ -43,7 +45,8 @@ post.content = "there!";
 post = await postRepository.save(post);
 
 // Retrieve all stored versions for this post
-const versionRepository = connection.getCustomRepository(VersionRepository);
+
+const versionRepository = VersionRepository(dataSource);
 const versions = await versionRepository.allForEntity(post);
 console.log(versions);
 
@@ -92,7 +95,7 @@ import { VersionedEntity, VersionedBaseEntity } from "typeorm-versions";
 // Instead of TypeORM's BaseEntity, use VersionedBaseEntity
 @Entity()
 @VersionedEntity()
-class Post extends VersionedBaseEntity{
+class Post extends VersionedBaseEntity {
 
     @PrimaryGeneratedColumn()
     id!: number;
@@ -124,34 +127,17 @@ npm install typeorm-versions
 
 You need to register TypeORM-Vsersions' own `Version` entity and `VersionSubscriber` within your connection.
 
-In your ormconfig.json add
-
-```json
-{
-    ...
-    "entities": [
-        "entity/*.js",
-        "./node_modules/typeorm-version/dist/entity/Version.js" 
-    ],
-    "subscribers": [
-        "subscriber/*.js",
-        "./node_modules/typeorm-version/dist/subscribers/VersionSubscriber.js"
-    ],
-    ...
-}
-```
-
-Alternatively, TypeORM-Versions provides a convenience function `versionsConfig`, which can be used in code and injects the settings:
+TypeORM-Versions provides a convenience function `versionsConfig`, which can be used in code and injects the settings:
 
 ```typescript
-import { ConnectionOptions } from 'typeorm';
+import { DataSourceOptions } from 'typeorm';
 import { versionsConfig } from 'typeorm-versions';
 
-const connectionOptions: ConnectionOptions = {
+let dataSourceOptions: DataSourceOptions = {
     ...
 }
 
-connectionOptions = versionsConfig(connctionOptions);
+dataSourceOptions = versionsConfig(dataSourceOptions);
 ```
 
 Lastly, create an empty migration in your migration directory and make sure it looks like:

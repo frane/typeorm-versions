@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-      "target": "es5",
+      "target": "es2020",
       "module": "commonjs",
       "lib": [ "es2015" ],
       "declaration": true,
@@ -12,7 +12,8 @@
       "experimentalDecorators": true,
       "emitDecoratorMetadata": true,
       "forceConsistentCasingInFileNames": true,
-      "downlevelIteration": true
+      "downlevelIteration": true,
+      "resolveJsonModule": true
     },
     "include": [
       "src"
