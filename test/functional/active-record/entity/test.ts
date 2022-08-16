@@ -1,27 +1,34 @@
 import "reflect-metadata";
 import "mocha";
 import { expect } from "chai";
-import { closeTestingConnections, createTestingConnections, reloadTestingDatabases } from "../../../utils/test-utils";
-import { Connection } from "typeorm";
+import {
+    closeTestingConnections,
+    createTestingConnections,
+    reloadTestingDatabases,
+} from '../../../utils/test-utils';
 import { Post } from "./Post";
-import { Version, VersionEvent } from "../../../../src";
+import { VersionEvent } from "../../../../src";
+import { DataSource } from 'typeorm/data-source/DataSource';
+import { VersionRepository } from '../../../../src';
 
 describe("Active Record - Simple entity", () => {
 
-    let connections: Connection[] = [];
-    before(async () => connections = await createTestingConnections({
-        entities: [Post],
-    }));
+    let connections: DataSource[] = [];
+    before(async () => {
+        return connections = await createTestingConnections({
+            entities: [Post],
+        })
+    });
     beforeEach(() => reloadTestingDatabases(connections));
     after(() => closeTestingConnections(connections));
 
     it("save 1 item", () => Promise.all(connections.map(async connection => {
-        Post.useConnection(connection);
+        Post.useDataSource(connection);
 
         let post = new Post();
         post.title = "hello";
         post.content = "World";
-        await post.save();
+        const s = await post.save();
 
         const versions = await post.versions().list();
 
@@ -32,7 +39,7 @@ describe("Active Record - Simple entity", () => {
     })));
 
     it("save 2 items", () => Promise.all(connections.map(async connection => {
-        Post.useConnection(connection);
+        Post.useDataSource(connection);
 
         let post = new Post();
         post.title = "hello";
@@ -53,7 +60,7 @@ describe("Active Record - Simple entity", () => {
     })));
 
     it("update item", () => Promise.all(connections.map(async connection => {
-        Post.useConnection(connection);
+        Post.useDataSource(connection);
 
         let post = new Post();
         post.title = "hello";
@@ -72,7 +79,7 @@ describe("Active Record - Simple entity", () => {
     })));
 
     it("remove item", () => Promise.all(connections.map(async connection => {
-        Post.useConnection(connection);
+        Post.useDataSource(connection);
 
         let post = new Post();
         post.title = "hello";
@@ -93,7 +100,7 @@ describe("Active Record - Simple entity", () => {
     })));
 
     it("recover item", () => Promise.all(connections.map(async connection => {
-        Post.useConnection(connection);
+        Post.useDataSource(connection);
 
         let post = new Post();
         post.title = "Hello";
@@ -115,7 +122,7 @@ describe("Active Record - Simple entity", () => {
     })));
 
     it("version navigation", () => Promise.all(connections.map(async connection => {
-        Post.useConnection(connection);
+        Post.useDataSource(connection);
 
         let post = new Post();
         post.title = "Hello";
@@ -132,7 +139,7 @@ describe("Active Record - Simple entity", () => {
         expect((await latestVersion!.previous())!.id).to
           .equal(previousVersion!.id, `failed for ${connection.name}`);
 
-        expect(await previousVersion!.previous()).to.equal(undefined, `failed for ${connection.name}`);
-        expect(await latestVersion!.next()).to.equal(undefined, `failed for ${connection.name}`);
+        expect(await previousVersion!.previous()).to.equal(null, `failed for ${connection.name}`);
+        expect(await latestVersion!.next()).to.equal(null, `failed for ${connection.name}`);
     })));
 });

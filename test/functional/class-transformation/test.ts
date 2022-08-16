@@ -4,6 +4,7 @@ import { closeTestingConnections, createTestingConnections, reloadTestingDatabas
 import { Connection } from "typeorm";
 import { VersionRepository } from "../../../src";
 import { Foo } from "./entity/Foo";
+import { Version } from '../../../dist';
 
 
 describe("Class Transformation", () => {
@@ -21,7 +22,7 @@ describe("Class Transformation", () => {
         const foo = new Foo();
         await fooRepository.save(foo);
 
-        const versionRepository = connection.getCustomRepository(VersionRepository);
+        const versionRepository = VersionRepository(connection)
         const versionedFoo = await versionRepository.latestObjectForEntity(foo);
 
         expect(versionedFoo).to.eql(foo);

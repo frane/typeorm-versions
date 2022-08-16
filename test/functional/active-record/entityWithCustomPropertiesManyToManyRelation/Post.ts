@@ -1,6 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { VersionedEntity } from '../../../../src';
-import { VersionedBaseEntity } from '../../../../src/entity/VersionedBaseEntity';
+import { VersionedBaseEntity } from '../../../../src';
 import { Category } from './Category';
 import { PostToCategory } from './PostToCategory';
 

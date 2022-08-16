@@ -1,5 +1,16 @@
-import { ClassConstructor, deserialize, plainToClass } from 'class-transformer';
-import { Entity, Column, PrimaryGeneratedColumn, ObjectLiteral, getMetadataArgsStorage, Connection, LessThan, MoreThan, Raw, Not } from 'typeorm';
+import { ClassConstructor, plainToClass } from 'class-transformer';
+import {
+    Entity,
+    Column,
+    PrimaryGeneratedColumn,
+    ObjectLiteral,
+    getMetadataArgsStorage,
+    LessThan,
+    MoreThan,
+    Raw,
+    Not,
+    DataSource,
+} from 'typeorm';
 import {SqliteDriver} from 'typeorm/driver/sqlite/SqliteDriver';
 
 export enum VersionEvent {
@@ -35,14 +46,28 @@ export class Version {
     timestamp!: Date;
 
     // @ts-ignore: Unused variable which is actually used
-    private static usedConnection?: Connection;
+    private static usedDataSource?: DataSource;
 
-    static useConnection(connection: Connection) {
-        this.usedConnection = connection;
+    /**
+     * @deprecated in favor of useDataSource
+     */
+    static useConnection(dataSource: DataSource) {
+        this.useDataSource(dataSource)
     }
 
-    protected getConnection() : Connection {
-        return (this.constructor as any).usedConnection;
+    static useDataSource(dataSource: DataSource) {
+        this.usedDataSource = dataSource;
+    }
+
+    /**
+     * @deprecated in favor of getDataSource
+     */
+    protected getConnection() : DataSource {
+        return this.getDataSource();
+    }
+
+    protected getDataSource() : DataSource {
+        return (this.constructor as any).usedDataSource;
     }
 
     public getObject<T>() : T {
@@ -54,44 +79,47 @@ export class Version {
         return {} as T;
     }
 
-    public previous() : Promise<Version | undefined> {
+    public previous() : Promise<Version | null> {
         // Date comparison workaround for SQLite
         let timestampQuery = LessThan(this.timestamp);
-        if (this.getConnection().driver instanceof SqliteDriver) {
+        if (this.getDataSource().driver instanceof SqliteDriver) {
             timestampQuery = Raw(alias => `STRFTIME('%Y-%m-%d %H:%M:%f', ${alias}) < STRFTIME('%Y-%m-%d %H:%M:%f', '${this.timestamp.toISOString()}')`);
         }
 
-        return this.getConnection().getRepository(Version).findOne({ 
-            itemId: this.itemId, 
-            itemType: this.itemType, 
-            id: Not(this.id),
-            timestamp: timestampQuery, 
-        }, {
+        return this.getDataSource().getRepository(Version).findOne({
+            where: {
+                itemId: this.itemId,
+                itemType: this.itemType,
+                id: Not(this.id),
+                timestamp: timestampQuery,
+
+            },
             order: { timestamp: 'DESC' }
         });
     }
-    public next() : Promise<Version | undefined> {
+    public next() : Promise<Version | null> {
         // Date comparison workaround for SQLite
         let timestampQuery = MoreThan(this.timestamp);
-        if (this.getConnection().driver instanceof SqliteDriver) {
+        if (this.getDataSource().driver instanceof SqliteDriver) {
             timestampQuery = Raw(alias => `STRFTIME('%Y-%m-%d %H:%M:%f', ${alias}) > STRFTIME('%Y-%m-%d %H:%M:%f', '${this.timestamp.toISOString()}')`);
         }
 
-        return this.getConnection().getRepository(Version).findOne({ 
-            itemId: this.itemId, 
-            itemType: this.itemType, 
-            id: Not(this.id),
-            timestamp: timestampQuery,
-        }, {
+        return this.getDataSource().getRepository(Version).findOne({
+            where: {
+                itemId: this.itemId,
+                itemType: this.itemType,
+                id: Not(this.id),
+                timestamp: timestampQuery,
+            },
             order: { timestamp: 'DESC' }
         });
     }
 
     public async index() : Promise<number | undefined> {
-        const versions = await this.getConnection().getRepository(Version).find({
+        const versions = await this.getDataSource().getRepository(Version).find({
             where: {
                 itemId: this.itemId,
-                itemType: this.itemType, 
+                itemType: this.itemType,
             },
             order: { timestamp: 'DESC' }
         });

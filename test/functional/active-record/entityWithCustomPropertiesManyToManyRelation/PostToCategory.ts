@@ -1,10 +1,10 @@
 import {
   Column,
-  Entity, ManyToOne,
+  Entity, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Post } from './Post';
 import { Category } from './Category';
-import { VersionedBaseEntity, VersionedEntity } from '../../../../dist';
+import { VersionedBaseEntity, VersionedEntity } from '../../../../src';
 
 @Entity()
 @VersionedEntity()
@@ -15,12 +15,21 @@ export class PostToCategory extends VersionedBaseEntity {
     this.active = true;
   }
 
+  @PrimaryGeneratedColumn()
+  public postToCategoryId!: number
+
   @Column()
   public active!: boolean;
 
-  @ManyToOne(() => Post, post => post.postToCategories, { primary: true, onDelete: 'CASCADE' })
+  @Column()
+  public postId!: number
+
+  @ManyToOne(() => Post, post => post.postToCategories, { onDelete: 'CASCADE' })
   public post!: Post;
 
-  @ManyToOne(() => Category, category => category.postToCategories, { primary: true, cascade: true })
+  @Column()
+  public categoryId!: number
+
+  @ManyToOne(() => Category, category => category.postToCategories, { cascade: true })
   public category!: Category;
 }

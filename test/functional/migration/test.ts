@@ -2,13 +2,16 @@ import { expect } from "chai";
 import { closeTestingConnections, createTestingConnections, reloadTestingDatabases } from "../../utils/test-utils";
 import { Connection, MigrationExecutor } from "typeorm";
 import { AddVersionMigration } from "../../../src/migration/AddVersionMigration";
+import { DataSource } from 'typeorm/data-source/DataSource';
+import { MigrationInterface } from 'typeorm/migration/MigrationInterface';
+import { QueryRunner } from 'typeorm/query-runner/QueryRunner';
 
 class Version1000000000001 extends AddVersionMigration { tableName = "version1"}
 class Version1000000000002 extends AddVersionMigration { tableName = "version2" }
 
 describe("Migration", () => {
 
-    let connections: Connection[];
+    let connections: DataSource[];
     before(async () => connections = await createTestingConnections({
         schemaCreate: true,
         dropSchema: true,
@@ -39,5 +42,5 @@ describe("Migration", () => {
         expect(tables[1].name).to.equal("version2", `failed for ${connection.name}`);
         expect(tables[0].columns).to.deep.equal(tables[1].columns, `failed for ${connection.name}`);
     })));
-    
+
 });

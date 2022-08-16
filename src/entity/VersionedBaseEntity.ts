@@ -1,4 +1,4 @@
-import { BaseEntity, Connection, getConnection } from "typeorm";
+import { BaseEntity, DataSource } from 'typeorm';
 import { VersionRepository } from "../repository/VersionRepository";
 
 class VersionHelperMethods<T extends BaseEntity> {
@@ -8,30 +8,38 @@ class VersionHelperMethods<T extends BaseEntity> {
         this.entity = entity;
     }
 
-    protected getConnection() : Connection {
-        return (this.entity.constructor as any).usedConnection || getConnection();
+    protected getDataSource(): DataSource {
+        // @ts-ignore
+        return (this.entity.constructor as typeof BaseEntity).target?.dataSource;
     }
 
-    async list() { 
-        return this.getConnection().getCustomRepository(VersionRepository).allForEntity(this.entity);
+    /**
+     * @protected
+     * @deprecated in favor of getDataSource
+     */
+    protected getConnection() : DataSource {
+        return this.getDataSource()
     }
 
-    async previous() { 
-        return this.getConnection().getCustomRepository(VersionRepository).previousForEntity(this.entity);
+    async list() {
+        return VersionRepository(this.getDataSource()).allForEntity(this.entity)
     }
 
-    async latest() { 
-        return this.getConnection().getCustomRepository(VersionRepository).latestForEntity(this.entity); 
+    async previous() {
+        return VersionRepository(this.getDataSource()).previousForEntity(this.entity)
     }
 
-    async previousObject() { 
+    async latest() {
+        return VersionRepository(this.getDataSource()).latestForEntity(this.entity)
+    }
+
+    async previousObject() {
         return (await this.previous())?.getObject<T>();
     }
 
-    async latestObject() { 
-        return (await this.latest())?.getObject<T>(); 
+    async latestObject() {
+        return (await this.latest())?.getObject<T>();
     }
-
 }
 
 export class VersionedBaseEntity extends BaseEntity {
