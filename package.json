@@ -54,6 +54,7 @@
     "chai-as-promised": "^7.1.2",
     "mocha": "^10.8.2",
     "better-sqlite3": "^11.6.0",
+    "mysql2": "^3.11.4",
     "pg": "^8.13.1",
     "rimraf": "^5.0.10",
     "ts-node": "^10.9.2",

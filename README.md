@@ -4,12 +4,46 @@ A [paper_trail](https://github.com/paper-trail-gem/paper_trail) inspired version
 
 **Compatible with TypeORM >= 0.3**
 
+## Installation
+
+```
+npm install typeorm-versions
+```
+
+You need to register TypeORM-Versions' own `Version` entity and `VersionSubscriber` within your DataSource.
+
+TypeORM-Versions provides a convenience function `versionsConfig`, which injects the required settings:
+
+```typescript
+import { DataSourceOptions } from 'typeorm';
+import { versionsConfig } from 'typeorm-versions';
+
+let dataSourceOptions: DataSourceOptions = {
+    ...
+}
+
+dataSourceOptions = versionsConfig(dataSourceOptions);
+```
+
+Then create a migration in your migration directory to create the version table:
+
+```typescript
+import { AddVersionMigration } from "typeorm-versions";
+
+// The timestamp should fit your migration order
+export class AddVersion1700000000000 extends AddVersionMigration {}
+// By default creates a table named "version". Override tableName to customize:
+// export class AddVersion1700000000000 extends AddVersionMigration { tableName = "entity_versions" }
+```
+
 ## Usage
+
+### Data Mapper Pattern
 
 Define your entity and annotate it with the `@VersionedEntity()` decorator.
 
 ```typescript
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
 import { VersionedEntity } from "typeorm-versions";
 
 @Entity()
@@ -19,7 +53,7 @@ class Post {
     @PrimaryGeneratedColumn()
     id!: number;
 
-    @Column()    
+    @Column()
     title!: string;
 
     @Column()
@@ -28,11 +62,13 @@ class Post {
 }
 ```
 
-At any other point in your code use it like
+Then use it with the `VersionRepository`:
 
 ```typescript
-// Repository pattern
+import { VersionRepository, VersionEvent } from "typeorm-versions";
+
 const postRepository = dataSource.getRepository(Post);
+const versionRepository = VersionRepository(dataSource);
 
 // Store a post
 let post = new Post();
@@ -45,8 +81,6 @@ post.content = "there!";
 post = await postRepository.save(post);
 
 // Retrieve all stored versions for this post
-
-const versionRepository = VersionRepository(dataSource);
 const versions = await versionRepository.allForEntity(post);
 console.log(versions);
 
@@ -77,19 +111,24 @@ const previousVersion = await versionRepository.previousForEntity(post);
 post = previousVersion!.getObject<Post>();
 await postRepository.save(post);
 
-// All navigation options
+// Other navigation options
 const latestVersion = await versionRepository.latestForEntity(post);
-const previousPost = await versionRepository.previousObjectForEntity(post); // Get the entity object directly instead of the version
+const previousPost = await versionRepository.previousObjectForEntity(post); // Get the entity object directly
 const latestPost = await versionRepository.latestObjectForEntity(post);
+
+// Versions also support navigation
+const next = await previousVersion!.next();
+const prev = await latestVersion!.previous();
 ```
 
-TypeORM-Versions also works with the active record pattern
+### Active Record Pattern
+
+Use `VersionedBaseEntity` instead of TypeORM's `BaseEntity`:
 
 ```typescript
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
 import { VersionedEntity, VersionedBaseEntity } from "typeorm-versions";
 
-// Instead of TypeORM's BaseEntity, use VersionedBaseEntity
 @Entity()
 @VersionedEntity()
 class Post extends VersionedBaseEntity {
@@ -97,55 +136,37 @@ class Post extends VersionedBaseEntity {
     @PrimaryGeneratedColumn()
     id!: number;
 
-    @Column()    
+    @Column()
     title!: string;
 
     @Column()
     content!: string;
 
 }
-
-// Which provides helper methods like...
-let post = await Post.findOneBy({ id: 1 });
-await post.versions().list(); // List all versions
-await post.versions().previous();
-await post.versions().latest();
-await post.versions().previousObject(); // Get the object instead of version
-await post.versions().latestObject();
-
-
 ```
 
-## Installation
-
-```
-npm install typeorm-versions
-```
-
-You need to register TypeORM-Versions' own `Version` entity and `VersionSubscriber` within your DataSource.
-
-TypeORM-Versions provides a convenience function `versionsConfig`, which can be used in code and injects the settings:
+Which provides helper methods directly on the entity:
 
 ```typescript
-import { DataSourceOptions } from 'typeorm';
-import { versionsConfig } from 'typeorm-versions';
+let post = new Post();
+post.title = "Hello";
+post.content = "World";
+await post.save();
 
-let dataSourceOptions: DataSourceOptions = {
-    ...
-}
+post.title = "Bye";
+await post.save();
 
-dataSourceOptions = versionsConfig(dataSourceOptions);
-```
+// List all versions
+const versions = await post.versions().list();
 
-Lastly, create a migration in your migration directory to create the version table:
+// Navigate versions
+const previousVersion = await post.versions().previous();
+const latestVersion = await post.versions().latest();
 
-```typescript
-import { AddVersionMigration } from "typeorm-versions";
-
-// The timestamp should fit your migration order
-export class AddVersion1700000000000 extends AddVersionMigration {}
-// By default creates a table named "version". Override tableName to customize:
-// export class AddVersion1700000000000 extends AddVersionMigration { tableName = "entity_versions" }
+// Get entity objects directly
+const previousPost = await post.versions().previousObject();
+await previousPost!.save(); // recover previous version
+const latestPost = await post.versions().latestObject();
 ```
 
 ## Future To-Dos

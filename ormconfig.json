@@ -38,46 +38,5 @@
     "password": "test",
     "database": "test",
     "logging": false
-  },
-  {
-    "skip": true,
-    "name": "mssql",
-    "type": "mssql",
-    "host": "localhost",
-    "username": "sa",
-    "password": "Admin12345",
-    "database": "tempdb",
-    "logging": false
-  },
-  {
-    "skip": true,
-    "name": "oracle",
-    "type": "oracle",
-    "host": "localhost",
-    "username": "system",
-    "password": "oracle",
-    "port": 1521,
-    "sid": "xe.oracle.docker",
-    "logging": false
-  },
-  {
-    "skip": true,
-    "name": "cockroachdb",
-    "type": "cockroachdb",
-    "host": "localhost",
-    "port": 26257,
-    "username": "root",
-    "password": "",
-    "database": "defaultdb"
-  },
-  {
-    "skip": true,
-    "disabledIfNotEnabledImplicitly": true,
-    "name": "mongodb",
-    "type": "mongodb",
-    "database": "test",
-    "logging": true,
-    "useNewUrlParser": true,
-    "useUnifiedTopology": true
   }
 ]
