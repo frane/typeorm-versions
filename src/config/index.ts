@@ -4,9 +4,14 @@ import { VersionSubscriber } from '../subscriber/VersionSubscriber';
 
 export function versionsConfig(databaseConfig: DataSourceOptions) : DataSourceOptions {
     // @ts-ignore
-    databaseConfig.entities?.push(Version);
+    if (!databaseConfig.entities) databaseConfig.entities = [];
     // @ts-ignore
-    databaseConfig.subscribers?.push(VersionSubscriber);
+    if (!databaseConfig.subscribers) databaseConfig.subscribers = [];
+
+    // @ts-ignore
+    databaseConfig.entities.push(Version);
+    // @ts-ignore
+    databaseConfig.subscribers.push(VersionSubscriber);
 
     return databaseConfig;
 };

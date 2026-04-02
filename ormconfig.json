@@ -23,8 +23,8 @@
   },
   {
     "skip": false,
-    "name": "sqlite",
-    "type": "sqlite",
+    "name": "better-sqlite3",
+    "type": "better-sqlite3",
     "database": "temp/sqlitedb.db",
     "logging": false
   },

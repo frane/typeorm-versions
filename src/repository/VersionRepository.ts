@@ -1,4 +1,4 @@
-import { DataSource, EntityManager, getConnectionManager, ObjectLiteral } from 'typeorm';
+import { DataSource, EntityManager, ObjectLiteral } from 'typeorm';
 import { Version, VersionEvent } from '../entity/Version';
 import { instanceToPlain } from 'class-transformer';
 

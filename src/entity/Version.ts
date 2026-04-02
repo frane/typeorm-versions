@@ -12,6 +12,7 @@ import {
     DataSource,
 } from 'typeorm';
 import {SqliteDriver} from 'typeorm/driver/sqlite/SqliteDriver';
+import {BetterSqlite3Driver} from 'typeorm/driver/better-sqlite3/BetterSqlite3Driver';
 
 export enum VersionEvent {
     INSERT = 'INSERT',
@@ -82,7 +83,7 @@ export class Version {
     public previous() : Promise<Version | null> {
         // Date comparison workaround for SQLite
         let timestampQuery = LessThan(this.timestamp);
-        if (this.getDataSource().driver instanceof SqliteDriver) {
+        if (this.getDataSource().driver instanceof SqliteDriver || this.getDataSource().driver instanceof BetterSqlite3Driver) {
             timestampQuery = Raw(alias => `STRFTIME('%Y-%m-%d %H:%M:%f', ${alias}) < STRFTIME('%Y-%m-%d %H:%M:%f', '${this.timestamp.toISOString()}')`);
         }
 
@@ -100,7 +101,7 @@ export class Version {
     public next() : Promise<Version | null> {
         // Date comparison workaround for SQLite
         let timestampQuery = MoreThan(this.timestamp);
-        if (this.getDataSource().driver instanceof SqliteDriver) {
+        if (this.getDataSource().driver instanceof SqliteDriver || this.getDataSource().driver instanceof BetterSqlite3Driver) {
             timestampQuery = Raw(alias => `STRFTIME('%Y-%m-%d %H:%M:%f', ${alias}) > STRFTIME('%Y-%m-%d %H:%M:%f', '${this.timestamp.toISOString()}')`);
         }
 

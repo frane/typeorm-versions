@@ -2,7 +2,7 @@ import { DataSource } from "typeorm/data-source/DataSource"
 import { DataSourceOptions } from "typeorm/data-source/DataSourceOptions"
 import { DatabaseType } from "typeorm/driver/types/DatabaseType"
 import { EntitySchema } from "typeorm/entity-schema/EntitySchema"
-import { createConnections } from "typeorm"
+import { DataSource as DataSourceClass } from "typeorm"
 import { NamingStrategyInterface } from "typeorm/naming-strategy/NamingStrategyInterface"
 import { QueryResultCache } from "typeorm/cache/QueryResultCache"
 import { Logger } from "typeorm/logger/Logger"
@@ -302,8 +302,9 @@ export function setupTestingConnections(
 export async function createTestingConnections(
   options?: TestingOptions,
 ): Promise<DataSource[]> {
-    const connections = await createConnections(
-      setupTestingConnections(options),
+    const connectionOptions = setupTestingConnections(options)
+    const connections = await Promise.all(
+      connectionOptions.map((opts) => new DataSourceClass(opts).initialize()),
     )
     await Promise.all(
       connections.map(async (connection) => {

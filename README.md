@@ -2,7 +2,7 @@
 
 A [paper_trail](https://github.com/paper-trail-gem/paper_trail) inspired versioning plugin for [TypeORM](https://typeorm.io/) to track changes in entities.
 
-**Compatible with typeORM => 0.3**
+**Compatible with TypeORM >= 0.3**
 
 ## Usage
 
@@ -74,14 +74,11 @@ console.log(versions);
 
 // To recover a previous version
 const previousVersion = await versionRepository.previousForEntity(post);
-
 post = previousVersion!.getObject<Post>();
 await postRepository.save(post);
 
-// All navigaton options
-const versionRepository = connection.getCustomRepository(VersionRepository);
-const previousVersion = await versionRepository.previousForEntity(post);
-const latestVersion = await versionRepository.latestForEntity(post)
+// All navigation options
+const latestVersion = await versionRepository.latestForEntity(post);
 const previousPost = await versionRepository.previousObjectForEntity(post); // Get the entity object directly instead of the version
 const latestPost = await versionRepository.latestObjectForEntity(post);
 ```
@@ -109,12 +106,12 @@ class Post extends VersionedBaseEntity {
 }
 
 // Which provides helper methods like...
-let post = Post.find(1);
-post.versions().list(); // List all all versions
-post.versions().previous();
-post.versions().latest();
-post.versions().previousObject(); // Get the object instead of version
-post.versions().latestObject();
+let post = await Post.findOneBy({ id: 1 });
+await post.versions().list(); // List all versions
+await post.versions().previous();
+await post.versions().latest();
+await post.versions().previousObject(); // Get the object instead of version
+await post.versions().latestObject();
 
 
 ```
@@ -125,7 +122,7 @@ post.versions().latestObject();
 npm install typeorm-versions
 ```
 
-You need to register TypeORM-Vsersions' own `Version` entity and `VersionSubscriber` within your connection.
+You need to register TypeORM-Versions' own `Version` entity and `VersionSubscriber` within your DataSource.
 
 TypeORM-Versions provides a convenience function `versionsConfig`, which can be used in code and injects the settings:
 
@@ -140,11 +137,15 @@ let dataSourceOptions: DataSourceOptions = {
 dataSourceOptions = versionsConfig(dataSourceOptions);
 ```
 
-Lastly, create an empty migration in your migration directory and make sure it looks like:
+Lastly, create a migration in your migration directory to create the version table:
 
 ```typescript
-class Version1000000000001 extends AddVersionMigration { tableName = "Version1000000000001" }
-// 1000000000001 should be a timestamp that fits your migration order
+import { AddVersionMigration } from "typeorm-versions";
+
+// The timestamp should fit your migration order
+export class AddVersion1700000000000 extends AddVersionMigration {}
+// By default creates a table named "version". Override tableName to customize:
+// export class AddVersion1700000000000 extends AddVersionMigration { tableName = "entity_versions" }
 ```
 
 ## Future To-Dos
