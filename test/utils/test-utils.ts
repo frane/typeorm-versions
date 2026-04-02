@@ -1,13 +1,8 @@
-import { DataSource } from "typeorm/data-source/DataSource"
-import { DataSourceOptions } from "typeorm/data-source/DataSourceOptions"
-import { DatabaseType } from "typeorm/driver/types/DatabaseType"
-import { EntitySchema } from "typeorm/entity-schema/EntitySchema"
-import { DataSource as DataSourceClass } from "typeorm"
-import { NamingStrategyInterface } from "typeorm/naming-strategy/NamingStrategyInterface"
-import { QueryResultCache } from "typeorm/cache/QueryResultCache"
-import { Logger } from "typeorm/logger/Logger"
+import { DataSource, DataSourceOptions, DatabaseType, EntitySchema, NamingStrategyInterface, MigrationInterface } from "typeorm"
+// These types aren't re-exported from typeorm's top-level, use any for test config
+type QueryResultCache = any
+type Logger = any
 import path from "path"
-import { MigrationInterface } from 'typeorm/migration/MigrationInterface';
 import { versionsConfig } from '../../src';
 
 /**
@@ -304,7 +299,7 @@ export async function createTestingConnections(
 ): Promise<DataSource[]> {
     const connectionOptions = setupTestingConnections(options)
     const connections = await Promise.all(
-      connectionOptions.map((opts) => new DataSourceClass(opts).initialize()),
+      connectionOptions.map((opts) => new DataSource(opts).initialize()),
     )
     await Promise.all(
       connections.map(async (connection) => {

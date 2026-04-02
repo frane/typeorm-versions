@@ -8,7 +8,7 @@ import {
 } from '../../../utils/test-utils';
 import { Post } from "./Post";
 import { VersionEvent } from "../../../../src";
-import { DataSource } from 'typeorm/data-source/DataSource';
+import { DataSource } from 'typeorm';
 import { VersionRepository } from '../../../../src';
 
 describe("Active Record - Simple entity", () => {

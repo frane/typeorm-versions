@@ -2,9 +2,7 @@ import { expect } from "chai";
 import { closeTestingConnections, createTestingConnections, reloadTestingDatabases } from "../../utils/test-utils";
 import { Connection, MigrationExecutor } from "typeorm";
 import { AddVersionMigration } from "../../../src/migration/AddVersionMigration";
-import { DataSource } from 'typeorm/data-source/DataSource';
-import { MigrationInterface } from 'typeorm/migration/MigrationInterface';
-import { QueryRunner } from 'typeorm/query-runner/QueryRunner';
+import { DataSource, MigrationInterface, QueryRunner } from 'typeorm';
 
 class Version1000000000001 extends AddVersionMigration { tableName = "version1"}
 class Version1000000000002 extends AddVersionMigration { tableName = "version2" }

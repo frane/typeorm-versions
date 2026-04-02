@@ -6,7 +6,7 @@ import { Post } from "./Post";
 import { Category } from "./Category";
 import { VersionEvent } from "../../../../src";
 import { PostToCategory } from './PostToCategory';
-import { DataSource } from 'typeorm/data-source/DataSource';
+import { DataSource } from 'typeorm';
 
 describe("Active Record - Entity with custom properties ManyToMany relation", () => {
 

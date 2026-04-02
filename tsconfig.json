@@ -2,17 +2,18 @@
     "compilerOptions": {
       "target": "es2020",
       "module": "commonjs",
-      "lib": [ "es2015" ],
+      "lib": [ "es2020" ],
+      "types": [ "node", "mocha" ],
       "declaration": true,
       "declarationMap": true,
       "sourceMap": true,
+      "rootDir": "src",
       "outDir": "dist",
       "strict": true,
       "esModuleInterop": true,
       "experimentalDecorators": true,
       "emitDecoratorMetadata": true,
       "forceConsistentCasingInFileNames": true,
-      "downlevelIteration": true,
       "resolveJsonModule": true
     },
     "include": [
