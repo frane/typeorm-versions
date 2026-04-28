@@ -1,5 +1,6 @@
-import { BaseEntity, DataSource } from 'typeorm';
+import { BaseEntity, DataSource, RemoveOptions, SaveOptions } from 'typeorm';
 import { VersionRepository } from "../repository/VersionRepository";
+import { SKIP_VERSIONING_KEY } from "../skipVersioning";
 
 class VersionHelperMethods<T extends BaseEntity> {
     private entity: T;
@@ -45,5 +46,13 @@ class VersionHelperMethods<T extends BaseEntity> {
 export class VersionedBaseEntity extends BaseEntity {
     versions() : VersionHelperMethods<this> {
         return new VersionHelperMethods(this);
+    }
+
+    saveWithoutVersioning(options?: SaveOptions): Promise<this> {
+        return this.save({ ...options, data: { ...(options?.data || {}), [SKIP_VERSIONING_KEY]: true } });
+    }
+
+    removeWithoutVersioning(options?: RemoveOptions): Promise<this> {
+        return this.remove({ ...options, data: { ...(options?.data || {}), [SKIP_VERSIONING_KEY]: true } });
     }
 }

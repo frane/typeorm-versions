@@ -169,6 +169,58 @@ await previousPost!.save(); // recover previous version
 const latestPost = await post.versions().latestObject();
 ```
 
+## Skipping Version Recording
+
+Version rows are written via a TypeORM subscriber on every `save` / `remove` of a `@VersionedEntity`. For bulk operations (seeding, schema imports, batch upserts) the per-row JSON diffs can accumulate hundreds of MBs of heap and the per-row history is usually low value — the bulk op itself is the audit unit.
+
+You can opt out of version recording per call. The flag rides on TypeORM's `SaveOptions.data` / `RemoveOptions.data`, so it propagates through cascades and stays scoped to the operation. Default behavior is unchanged.
+
+### Data Mapper
+
+```typescript
+import { saveWithoutVersioning, removeWithoutVersioning } from 'typeorm-versions';
+
+// Repository
+await saveWithoutVersioning(postRepository, post);
+await saveWithoutVersioning(postRepository, [a, b, c]);
+
+// EntityManager (e.g. inside a transaction)
+await dataSource.transaction(async (manager) => {
+  for (const row of bigBatch) {
+    await saveWithoutVersioning(manager, row);
+  }
+});
+
+// DataSource (uses dataSource.manager)
+await saveWithoutVersioning(dataSource, post);
+
+// Removes work the same way
+await removeWithoutVersioning(postRepository, post);
+```
+
+### Active Record
+
+`VersionedBaseEntity` exposes matching instance methods:
+
+```typescript
+await post.saveWithoutVersioning();
+await post.removeWithoutVersioning();
+```
+
+### Cascades
+
+Cascaded child saves inherit the flag because TypeORM forwards `options.data` to all subscriber events under the same persistence operation. One call covers the full object graph.
+
+### Raw escape hatch
+
+If you can't reach the helpers (e.g. third-party code calls `save` on your behalf), pass the flag directly. This is the underlying contract:
+
+```typescript
+await postRepository.save(post, { data: { skipVersioning: true } });
+```
+
+Existing `data` fields are preserved — the helpers merge rather than replace.
+
 ## Future To-Dos
 - [ ] More tests
 - [ ] More / improve docs
